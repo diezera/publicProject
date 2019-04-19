@@ -25,43 +25,42 @@ public class AnnotationAspectj {
     }
 
     @AfterReturning(returning = "ret", pointcut = "aop()")
-    public void afterReturning(JoinPoint joinPoint,Object ret) throws Throwable {
+    public void afterReturning(JoinPoint joinPoint, Object ret) throws Throwable {
         // 处理完请求，返回内容
-        MethodSignature signature=(MethodSignature) joinPoint.getSignature();
-        Method method=signature.getMethod();
-        Annotation  annoMethod=method.getAnnotation(ShuaigeCheng.class);
+        MethodSignature signature = (MethodSignature)joinPoint.getSignature();
+        Method method = signature.getMethod();
 
-        if( ret instanceof  Collection){
-            List<Object> retList=(List<Object>)ret;
-            for (Object o:retList){
-                doAspectj(annoMethod,o);
+        Annotation annoMethod = method.getAnnotation(ShuaigeCheng.class);
+
+        if (ret instanceof Collection) {
+            List<Object> retList = (List<Object>)ret;
+            for (Object o : retList) {
+                doAspectj(annoMethod, o);
             }
-        }else {
-            doAspectj(annoMethod,ret);
+        } else {
+            doAspectj(annoMethod, ret);
         }
 
-
     }
-    private  void  doAspectj(Annotation  annoMethod,Object ret)throws Throwable {
+
+    private void doAspectj(Annotation annoMethod, Object ret) throws Throwable {
         Field[] fields = ret.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
-            if( field.isAnnotationPresent(ShuaigeCheng.class)){
-                Annotation annoField= field.getAnnotation(ShuaigeCheng.class);
-                //等级低于conrtoller的属性清空
-                if (((ShuaigeCheng) annoField).level()<((ShuaigeCheng) annoMethod).level()){
-                    String type= field.getType().toString();
+            if (field.isAnnotationPresent(ShuaigeCheng.class)) {
+                Annotation annoField = field.getAnnotation(ShuaigeCheng.class);
+                // 等级低于conrtoller的属性清空
+                if (((ShuaigeCheng)annoField).level() < ((ShuaigeCheng)annoMethod).level()) {
+                    String type = field.getType().toString();
                     if (type.endsWith("boolean")) {
                         field.set(ret, false);
-                    }else {
+                    } else {
                         field.set(ret, null);
                     }
                 }
             }
 
-
         }
     }
-
 
 }
